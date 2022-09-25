@@ -1,5 +1,5 @@
 plugins {
-    id("recipeapp.application.compose")
+    id("recipeapp.application.xml")
     id("recipeapp.code.quality")
     id("recipeapp.gradle.versions")
 }
@@ -17,20 +17,5 @@ android {
 }
 
 dependencies {
-    implementation(libs.bundles.androidx.ui)
-    implementation(libs.bundles.compose)
-    implementation(libs.bundles.logging)
-
-    implementation(libs.koin.android)
-    implementation(libs.koin.compose)
-
-    implementation(libs.accompanist.navigation.animation)
-    implementation(libs.accompanist.navigation.material)
-    implementation(libs.accompanist.insets)
-    implementation(libs.accompanist.pager)
-    implementation(libs.accompanist.ui.controller)
-
-    implementation(libs.compose.destinations.core)
-
-    testImplementation(libs.koin.test)
+    implementation(libs.bundles.androidx.ui.xml)
 }

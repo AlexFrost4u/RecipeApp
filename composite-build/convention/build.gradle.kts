@@ -16,6 +16,11 @@ gradlePlugin {
         implementationClass = "AndroidApplicationComposePlugin"
     }
 
+    plugins.register("android-application-xml-plugin") {
+        id = "recipeapp.application.xml"
+        implementationClass = "AndroidApplicationXmlPlugin"
+    }
+
     plugins.register("android-application-plugin") {
         id = "recipeapp.application"
         implementationClass = "AndroidApplicationPlugin"
@@ -24,6 +29,11 @@ gradlePlugin {
     plugins.register("android-library-compose-plugin") {
         id = "recipeapp.library.compose"
         implementationClass = "AndroidLibraryComposePlugin"
+    }
+
+    plugins.register("android-library-xml-plugin") {
+        id = "recipeapp.library.xml"
+        implementationClass = "AndroidLibraryXmlPlugin"
     }
 
     plugins.register("android-library-plugin") {
@@ -36,7 +46,7 @@ gradlePlugin {
         implementationClass = "CodeQualityPlugin"
     }
 
-    plugins.register("gradle-versions-plguin") {
+    plugins.register("gradle-versions-plugin") {
         id = "recipeapp.gradle.versions"
         implementationClass = "GradleVersionPlugin"
     }
