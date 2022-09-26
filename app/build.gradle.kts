@@ -17,5 +17,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.core.ui)
+
     implementation(libs.bundles.androidx.ui.xml)
 }
