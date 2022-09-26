@@ -5,6 +5,16 @@ plugins {
 }
 
 android {
+    // Temporary keystore
+    signingConfigs {
+        create("release") {
+            keyAlias = "recipeapp"
+            keyPassword = "recipeapp"
+            storeFile = File("${rootDir.absolutePath}/keystore/recipeapp_keystore.jks")
+            storePassword = "recipeapp"
+        }
+    }
+
     defaultConfig {
         applicationId = "com.alexfrost.recipeapp"
         versionCode = 1
@@ -12,6 +22,21 @@ android {
 
         vectorDrawables {
             useSupportLibrary = true
+        }
+    }
+
+    buildTypes {
+        release {
+            isMinifyEnabled = true
+            isDebuggable = false
+            signingConfig = signingConfigs.getByName("release")
+
+            proguardFiles("proguard-android.txt", "proguard-rules.pro")
+        }
+
+        debug {
+            isMinifyEnabled = false
+            isDebuggable = true
         }
     }
 }
