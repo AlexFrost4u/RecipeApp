@@ -20,4 +20,8 @@ dependencyResolutionManagement {
 
 rootProject.name = "RecipeApp"
 
+// App modules
 include(":app")
+
+// Common modules
+include(":core:ui")
