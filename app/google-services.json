@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "800212458441",
+    "project_id": "recipesapp-bd82d",
+    "storage_bucket": "recipesapp-bd82d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800212458441:android:33ef6ffd763b7cf13d6618",
+        "android_client_info": {
+          "package_name": "com.alexfrost.recipeapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "800212458441-5qtas3q15l2no06r37j79u2uls11ir3g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCVwGHBj8EmjhvMWnWXcaEd1Mg7Itxy6mM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "800212458441-5qtas3q15l2no06r37j79u2uls11ir3g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
