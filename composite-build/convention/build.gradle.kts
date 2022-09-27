@@ -50,6 +50,11 @@ gradlePlugin {
         id = "recipeapp.gradle.versions"
         implementationClass = "GradleVersionPlugin"
     }
+
+    plugins.register("firebase-plugin") {
+        id = "recipeapp.firebase"
+        implementationClass = "FirebasePlugin"
+    }
 }
 
 java {
