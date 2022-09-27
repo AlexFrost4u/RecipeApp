@@ -7,5 +7,6 @@ class FirebasePlugin : Plugin<Project> {
     override fun apply(target: Project) = target.run {
         apply(plugin = "com.google.gms.google-services")
         apply(plugin = "com.google.firebase.crashlytics")
+
     }
 }
