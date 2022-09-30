@@ -1,6 +1,10 @@
 plugins {
     id("recipeapp.code.quality")
-    id("recipeapp.library.xml")
+    id("recipeapp.library.compose")
 }
 
-dependencies {}
+dependencies {
+    api(libs.androidx.appcompat)
+    api(libs.bundles.compose)
+    api(libs.accompanist.insets)
+}
