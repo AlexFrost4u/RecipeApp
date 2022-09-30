@@ -1,5 +1,5 @@
 plugins {
-    id("recipeapp.application.xml")
+    id("recipeapp.application.compose")
     id("recipeapp.code.quality")
     id("recipeapp.gradle.versions")
     id("recipeapp.firebase")
@@ -45,7 +45,10 @@ android {
 dependencies {
     implementation(projects.core.ui)
 
-    implementation(libs.bundles.androidx.ui.xml)
+    implementation(libs.bundles.androidx.ui.compose)
+    implementation(libs.compose.navigation)
+
+    implementation(libs.accompanist.navigation.animation)
 
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
