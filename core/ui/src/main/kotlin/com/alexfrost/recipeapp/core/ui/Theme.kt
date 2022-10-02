@@ -50,7 +50,7 @@ fun RecipeAppTheme(content: @Composable () -> Unit) {
 }
 
 @Suppress
-object BeeplsTheme {
+object RecipeAppTheme {
     val colors: AppColor
         @Composable
         get() = LocalColors.current
