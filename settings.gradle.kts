@@ -25,3 +25,6 @@ include(":app")
 
 // Common modules
 include(":core:ui")
+
+// UI modules
+include(":ui:authorization")
