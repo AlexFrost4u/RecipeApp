@@ -14,7 +14,8 @@ data class AppColor(
     val yellow: Color,
     val primary: Color,
     val secondary: Color,
-    val silver: Color
+    val silver: Color,
+    val blue: Color
 )
 
 fun lightColors(): AppColor = AppColor(
@@ -24,7 +25,8 @@ fun lightColors(): AppColor = AppColor(
     red = Carnation,
     black = Black,
     silver = Iron,
-    yellow = LightningYellow
+    yellow = LightningYellow,
+    blue = BlueRibbon
 )
 
 val LocalColors = staticCompositionLocalOf {
@@ -35,7 +37,8 @@ val LocalColors = staticCompositionLocalOf {
         red = Color.Unspecified,
         black = Color.Unspecified,
         silver = Color.Unspecified,
-        yellow = Color.Unspecified
+        yellow = Color.Unspecified,
+        blue = Color.Unspecified
     )
 }
 
