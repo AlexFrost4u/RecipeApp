@@ -21,7 +21,11 @@ private fun NavGraphBuilder.addSignIn() {
     composable(
         route = AuthorizationScreen.SignIn.createRoute()
     ) {
-        SignInScreen()
+        SignInScreen(
+            openHome = {},
+            openForgotPassword = {},
+            openRegister ={}
+        )
     }
 }
 

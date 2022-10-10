@@ -1,5 +1,13 @@
 package com.alexfrost.recipeapp.ui.authorization.signin
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,6 +32,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,24 +46,58 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.alexfrost.recipeapp.core.ui.rippleClickable
 import com.alexfrost.recipeapp.core.ui.theme.RecipeAppTheme
+import com.alexfrost.recipeapp.ui.authorization.EmailValidation
+import com.alexfrost.recipeapp.ui.authorization.FieldValidation
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
 import com.alexfrost.core.ui.R as CoreRes
 
 @Composable
-fun SignInScreen() {
-    SignInContent(viewModel = getViewModel())
+fun SignInScreen(
+    openHome: () -> Unit,
+    openForgotPassword: () -> Unit,
+    openRegister: () -> Unit
+) {
+    SignInContent(
+        viewModel = getViewModel(),
+        openHome = openHome,
+        openForgotPassword = openForgotPassword,
+        openRegister = openRegister
+    )
 }
 
 @Composable
-internal fun SignInContent(viewModel: SignInViewModel) {
+internal fun SignInContent(
+    viewModel: SignInViewModel,
+    openHome: () -> Unit,
+    openForgotPassword: () -> Unit,
+    openRegister: () -> Unit
+) {
+    LaunchedEffect(viewModel) {
+        launch {
+            viewModel.container.sideEffectFlow.collectLatest { sideEffect ->
+                when (sideEffect) {
+                    is SignInSideEffect.NavigateToHome -> openHome()
+                    is SignInSideEffect.NavigateToForgotPassword -> openForgotPassword()
+                    is SignInSideEffect.NavigateToRegister -> openRegister()
+                }
+            }
+        }
+    }
+
     SignInContent(
         state = viewModel.container.stateFlow.collectAsState().value,
         onEmailChange = viewModel::updateEmail,
         onPasswordChange = viewModel::updatePassword,
-        onPreviewClick = viewModel::updatePreviewEnabled
+        onPreviewClick = viewModel::updatePreviewEnabled,
+        onForgotPasswordClick = {},
+        onSignInClick = viewModel::signIn,
+        onRegisterClick = {}
     )
 }
 
@@ -63,7 +106,10 @@ internal fun SignInContent(
     state: SignInState,
     onEmailChange: (String) -> Unit,
     onPasswordChange: (String) -> Unit,
-    onPreviewClick: () -> Unit
+    onPreviewClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    onSignInClick: () -> Unit,
+    onRegisterClick: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -72,8 +118,7 @@ internal fun SignInContent(
             .navigationBarsPadding()
             .imePadding()
             .statusBarsPadding()
-            .background(RecipeAppTheme.colors.white),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+            .background(RecipeAppTheme.colors.white)
     ) {
         val focusManager = LocalFocusManager.current
 
@@ -82,19 +127,25 @@ internal fun SignInContent(
             contentDescription = null,
             modifier = Modifier
                 .size(200.dp)
-                .padding(horizontal = 20.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
                 .align(Alignment.CenterHorizontally)
         )
 
         Text(
-            text = stringResource(id = CoreRes.string.login),
+            text = stringResource(id = CoreRes.string.sign_in),
             style = RecipeAppTheme.typography.h1,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(20.dp)
+                .padding(horizontal = 20.dp, vertical = 16.dp)
         )
 
         EmailInput(email = state.email, onValueChange = onEmailChange)
+
+        ValidationError(
+            errorMessage = stringResource(state.emailValidation.descriptionId),
+            validationEnabled = state.validationEnabled,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
 
         PasswordInput(
             password = state.password,
@@ -104,9 +155,26 @@ internal fun SignInContent(
             onDone = focusManager::clearFocus
         )
 
-        ForgotPasswordButton(onClick = { /*TODO*/ }, modifier = Modifier.align(Alignment.End))
+        ValidationError(
+            errorMessage = stringResource(
+                state.fieldValidation.descriptionId,
+                stringResource(CoreRes.string.password)
+            ),
+            validationEnabled = state.validationEnabled,
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
 
-        LoginButton(onClick = focusManager::clearFocus)
+        ForgotPasswordButton(
+            onClick = onForgotPasswordClick,
+            modifier = Modifier.align(Alignment.End)
+        )
+
+        SignInButton(
+            onClick = {
+                focusManager.clearFocus()
+                onSignInClick()
+            }
+        )
 
         Spacer(modifier = Modifier.weight(1f))
 
@@ -115,15 +183,41 @@ internal fun SignInContent(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp)
+                .padding(vertical = 8.dp)
         ) {
             Text(
                 text = stringResource(id = CoreRes.string.sign_in_desc_new_to_recipe),
                 style = RecipeAppTheme.typography.small,
             )
 
-            RegisterButton(onClick = { /*TODO*/ })
+            RegisterButton(onClick = onRegisterClick)
         }
+    }
+}
+
+@Composable
+internal fun ValidationError(
+    errorMessage: String,
+    validationEnabled: Boolean,
+    modifier: Modifier = Modifier
+) {
+    AnimatedVisibility(
+        visible = validationEnabled && errorMessage.isNotEmpty(),
+        enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
+        exit = shrinkVertically() + fadeOut(),
+        modifier = modifier
+    ) {
+        Text(
+            text = errorMessage,
+            color = RecipeAppTheme.colors.red,
+            style = RecipeAppTheme.typography.small,
+            modifier = modifier.animateContentSize(
+                animationSpec = tween(
+                    durationMillis = 250,
+                    easing = FastOutSlowInEasing
+                )
+            )
+        )
     }
 }
 
@@ -163,7 +257,7 @@ internal fun EmailInput(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     )
 }
 
@@ -229,7 +323,7 @@ internal fun PasswordInput(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 20.dp, vertical = 16.dp)
     )
 }
 
@@ -256,9 +350,10 @@ internal fun ForgotPasswordButton(onClick: () -> Unit, modifier: Modifier) {
 }
 
 @Composable
-internal fun LoginButton(onClick: () -> Unit) {
+internal fun SignInButton(onClick: () -> Unit) {
     Row(
         modifier = Modifier
+            .padding(vertical = 16.dp)
             .height(60.dp)
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
@@ -271,7 +366,7 @@ internal fun LoginButton(onClick: () -> Unit) {
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = CoreRes.string.login),
+            text = stringResource(id = CoreRes.string.sign_in),
             textAlign = TextAlign.Center,
             color = RecipeAppTheme.colors.white,
             style = RecipeAppTheme.typography.large,
@@ -299,6 +394,42 @@ internal fun RegisterButton(onClick: () -> Unit) {
             color = RecipeAppTheme.colors.blue,
             style = RecipeAppTheme.typography.small,
             modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
+        )
+    }
+}
+
+@Preview
+@Composable
+internal fun SignInPreview() {
+    RecipeAppTheme {
+        SignInContent(
+            state = SignInState(email = "example@example.com", password = "123qwe"),
+            onEmailChange = {},
+            onPasswordChange = {},
+            onPreviewClick = {},
+            onForgotPasswordClick = {},
+            onSignInClick = {},
+            onRegisterClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+internal fun SignInPreviewError() {
+    RecipeAppTheme {
+        SignInContent(
+            state = SignInState(
+                emailValidation = EmailValidation.Invalid,
+                fieldValidation = FieldValidation.Required,
+                validationEnabled = true
+            ),
+            onEmailChange = {},
+            onPasswordChange = {},
+            onPreviewClick = {},
+            onForgotPasswordClick = {},
+            onSignInClick = {},
+            onRegisterClick = {}
         )
     }
 }
