@@ -24,10 +24,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,15 +40,31 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.alexfrost.recipeapp.core.ui.rippleClickable
 import com.alexfrost.recipeapp.core.ui.theme.RecipeAppTheme
+import org.koin.androidx.compose.getViewModel
 import com.alexfrost.core.ui.R as CoreRes
 
 @Composable
 fun SignInScreen() {
-    SignInContent()
+    SignInContent(viewModel = getViewModel())
 }
 
 @Composable
-internal fun SignInContent() {
+internal fun SignInContent(viewModel: SignInViewModel) {
+    SignInContent(
+        state = viewModel.container.stateFlow.collectAsState().value,
+        onEmailChange = viewModel::updateEmail,
+        onPasswordChange = viewModel::updatePassword,
+        onPreviewClick = viewModel::updatePreviewEnabled
+    )
+}
+
+@Composable
+internal fun SignInContent(
+    state: SignInState,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onPreviewClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -62,9 +75,6 @@ internal fun SignInContent() {
             .background(RecipeAppTheme.colors.white),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        var email by remember { mutableStateOf("") }
-        var password by remember { mutableStateOf("") }
-        var previewEnabled by remember { mutableStateOf(false) }
         val focusManager = LocalFocusManager.current
 
         Image(
@@ -84,13 +94,13 @@ internal fun SignInContent() {
                 .padding(20.dp)
         )
 
-        EmailInput(email = email, onValueChange = { email = it })
+        EmailInput(email = state.email, onValueChange = onEmailChange)
 
         PasswordInput(
-            password = password,
-            previewEnabled = previewEnabled,
-            onValueChange = { password = it },
-            onPreviewClick = { previewEnabled = previewEnabled.not() },
+            password = state.password,
+            previewEnabled = state.isPreviewEnabled,
+            onValueChange = onPasswordChange,
+            onPreviewClick = onPreviewClick,
             onDone = focusManager::clearFocus
         )
 
@@ -100,9 +110,9 @@ internal fun SignInContent() {
 
         Spacer(modifier = Modifier.weight(1f))
 
-
         Row(
             horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
@@ -110,7 +120,6 @@ internal fun SignInContent() {
             Text(
                 text = stringResource(id = CoreRes.string.sign_in_desc_new_to_recipe),
                 style = RecipeAppTheme.typography.small,
-                modifier = Modifier.padding(5.dp)
             )
 
             RegisterButton(onClick = { /*TODO*/ })
@@ -226,20 +235,24 @@ internal fun PasswordInput(
 
 @Composable
 internal fun ForgotPasswordButton(onClick: () -> Unit, modifier: Modifier) {
-    Text(
-        text = stringResource(id = CoreRes.string.forgot_password),
-        textAlign = TextAlign.Center,
-        color = RecipeAppTheme.colors.blue,
-        style = RecipeAppTheme.typography.small,
+    Box(
         modifier = modifier
-            .padding(horizontal = 20.dp)
+            .padding(end = 12.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(RecipeAppTheme.colors.white, RoundedCornerShape(16.dp))
             .rippleClickable(
                 onClick = onClick,
                 bounded = true,
             )
-    )
+    ) {
+        Text(
+            text = stringResource(id = CoreRes.string.forgot_password),
+            textAlign = TextAlign.Center,
+            color = RecipeAppTheme.colors.blue,
+            style = RecipeAppTheme.typography.small,
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
+        )
+    }
 }
 
 @Composable
@@ -273,22 +286,19 @@ internal fun LoginButton(onClick: () -> Unit) {
 internal fun RegisterButton(onClick: () -> Unit) {
     Box(
         modifier = Modifier
-            .height(30.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(RecipeAppTheme.colors.white, RoundedCornerShape(16.dp))
             .rippleClickable(
                 onClick = onClick,
                 bounded = true,
-            ),
+            )
     ) {
         Text(
             text = stringResource(id = CoreRes.string.sign_in_btn_register),
             textAlign = TextAlign.Center,
             color = RecipeAppTheme.colors.blue,
             style = RecipeAppTheme.typography.small,
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .align(Alignment.Center)
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
         )
     }
 }

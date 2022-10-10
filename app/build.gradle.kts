@@ -49,6 +49,8 @@ dependencies {
     implementation(libs.bundles.androidx.ui.compose)
     implementation(libs.compose.navigation)
 
+    implementation(libs.koin.android)
+
     implementation(libs.accompanist.navigation.animation)
 
     implementation(platform(libs.firebase.bom))
