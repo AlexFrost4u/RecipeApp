@@ -41,9 +41,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.alexfrost.recipeapp.core.ui.RecipeAppTheme
 import com.alexfrost.recipeapp.core.ui.rippleClickable
+import com.alexfrost.recipeapp.core.ui.theme.RecipeAppTheme
 import com.alexfrost.core.ui.R as CoreRes
 
 @Composable
@@ -79,7 +78,7 @@ internal fun SignInContent() {
 
         Text(
             text = stringResource(id = CoreRes.string.login),
-            fontSize = 32.sp,
+            style = RecipeAppTheme.typography.h1,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(20.dp)
@@ -104,11 +103,13 @@ internal fun SignInContent() {
 
         Row(
             horizontalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
         ) {
             Text(
-                text = "New to Recipe?",
-                fontSize = 14.sp,
+                text = stringResource(id = CoreRes.string.sign_in_desc_new_to_recipe),
+                style = RecipeAppTheme.typography.small,
                 modifier = Modifier.padding(5.dp)
             )
 
@@ -147,6 +148,7 @@ internal fun EmailInput(
         label = {
             Text(
                 text = stringResource(id = CoreRes.string.email),
+                style = RecipeAppTheme.typography.small,
                 color = RecipeAppTheme.colors.black
             )
         },
@@ -212,6 +214,7 @@ internal fun PasswordInput(
         label = {
             Text(
                 text = stringResource(id = CoreRes.string.password),
+                style = RecipeAppTheme.typography.small,
                 color = RecipeAppTheme.colors.black
             )
         },
@@ -223,28 +226,20 @@ internal fun PasswordInput(
 
 @Composable
 internal fun ForgotPasswordButton(onClick: () -> Unit, modifier: Modifier) {
-    Row(
+    Text(
+        text = stringResource(id = CoreRes.string.forgot_password),
+        textAlign = TextAlign.Center,
+        color = RecipeAppTheme.colors.blue,
+        style = RecipeAppTheme.typography.small,
         modifier = modifier
-            .height(30.dp)
             .padding(horizontal = 20.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(RecipeAppTheme.colors.white, RoundedCornerShape(16.dp))
             .rippleClickable(
                 onClick = onClick,
                 bounded = true,
-            ),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        Text(
-            text = stringResource(id = CoreRes.string.forgot_password),
-            textAlign = TextAlign.Center,
-            color = RecipeAppTheme.colors.blue,
-            fontSize = 14.sp,
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .align(Alignment.CenterVertically)
-        )
-    }
+            )
+    )
 }
 
 @Composable
@@ -266,7 +261,7 @@ internal fun LoginButton(onClick: () -> Unit) {
             text = stringResource(id = CoreRes.string.login),
             textAlign = TextAlign.Center,
             color = RecipeAppTheme.colors.white,
-            fontSize = 18.sp,
+            style = RecipeAppTheme.typography.large,
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .align(Alignment.CenterVertically)
@@ -290,7 +285,7 @@ internal fun RegisterButton(onClick: () -> Unit) {
             text = stringResource(id = CoreRes.string.sign_in_btn_register),
             textAlign = TextAlign.Center,
             color = RecipeAppTheme.colors.blue,
-            fontSize = 14.sp,
+            style = RecipeAppTheme.typography.small,
             modifier = Modifier
                 .padding(horizontal = 8.dp)
                 .align(Alignment.Center)
