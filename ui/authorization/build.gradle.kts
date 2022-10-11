@@ -9,7 +9,9 @@ dependencies {
     implementation(libs.mvi.orbit)
 
     implementation(libs.koin.compose)
-    /*implementation(libs.koin.android)*/
+    implementation(libs.koin.android)
+
+    implementation(libs.bundles.logging)
 
     implementation(libs.bundles.androidx.ui.compose)
 }

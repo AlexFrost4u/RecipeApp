@@ -2,7 +2,7 @@ package com.alexfrost.recipeapp.ui.authorization.signin
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -34,10 +34,12 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.produceState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -50,8 +52,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.alexfrost.recipeapp.core.ui.rippleClickable
 import com.alexfrost.recipeapp.core.ui.theme.RecipeAppTheme
-import com.alexfrost.recipeapp.ui.authorization.EmailValidation
-import com.alexfrost.recipeapp.ui.authorization.FieldValidation
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.getViewModel
@@ -83,8 +83,6 @@ internal fun SignInContent(
             viewModel.container.sideEffectFlow.collectLatest { sideEffect ->
                 when (sideEffect) {
                     is SignInSideEffect.NavigateToHome -> openHome()
-                    is SignInSideEffect.NavigateToForgotPassword -> openForgotPassword()
-                    is SignInSideEffect.NavigateToRegister -> openRegister()
                 }
             }
         }
@@ -95,9 +93,9 @@ internal fun SignInContent(
         onEmailChange = viewModel::updateEmail,
         onPasswordChange = viewModel::updatePassword,
         onPreviewClick = viewModel::updatePreviewEnabled,
-        onForgotPasswordClick = {},
+        onForgotPasswordClick = openForgotPassword,
         onSignInClick = viewModel::signIn,
-        onRegisterClick = {}
+        onRegisterClick = openRegister
     )
 }
 
@@ -120,7 +118,22 @@ internal fun SignInContent(
             .statusBarsPadding()
             .background(RecipeAppTheme.colors.white)
     ) {
+        val context = LocalContext.current
         val focusManager = LocalFocusManager.current
+
+        val emailValidationText = produceState(initialValue = "", key1 = state.emailValidation) {
+            value = context.getString(state.emailValidation.descriptionId)
+        }.value
+
+        val passwordValidationText = produceState(
+            initialValue = "",
+            key1 = state.passwordValidation
+        ) {
+            value = context.getString(
+                state.passwordValidation.descriptionId,
+                context.getString(CoreRes.string.password)
+            )
+        }.value
 
         Image(
             painter = painterResource(id = CoreRes.drawable.ic_people),
@@ -139,28 +152,32 @@ internal fun SignInContent(
                 .padding(horizontal = 20.dp, vertical = 16.dp)
         )
 
-        EmailInput(email = state.email, onValueChange = onEmailChange)
+        EmailInput(
+            email = state.email,
+            isError = emailValidationText.isNotEmpty() && state.isValidationEnabled,
+            onValueChange = onEmailChange
+        )
 
         ValidationError(
-            errorMessage = stringResource(state.emailValidation.descriptionId),
-            validationEnabled = state.validationEnabled,
+            errorMessage = emailValidationText,
+            validationEnabled = emailValidationText.isNotEmpty() && state.isValidationEnabled,
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
         PasswordInput(
             password = state.password,
             previewEnabled = state.isPreviewEnabled,
+            isError = passwordValidationText.isNotEmpty() && state.isValidationEnabled,
             onValueChange = onPasswordChange,
             onPreviewClick = onPreviewClick,
-            onDone = focusManager::clearFocus
-        )
+            onDone = {
+                focusManager.clearFocus()
+                onSignInClick()
+            })
 
         ValidationError(
-            errorMessage = stringResource(
-                state.fieldValidation.descriptionId,
-                stringResource(CoreRes.string.password)
-            ),
-            validationEnabled = state.validationEnabled,
+            errorMessage = passwordValidationText,
+            validationEnabled = passwordValidationText.isNotEmpty() && state.isValidationEnabled,
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
@@ -204,7 +221,7 @@ internal fun ValidationError(
     AnimatedVisibility(
         visible = validationEnabled && errorMessage.isNotEmpty(),
         enter = expandVertically(expandFrom = Alignment.Top) + fadeIn(),
-        exit = shrinkVertically() + fadeOut(),
+        exit = shrinkVertically(shrinkTowards = Alignment.Bottom) + fadeOut(),
         modifier = modifier
     ) {
         Text(
@@ -214,7 +231,7 @@ internal fun ValidationError(
             modifier = modifier.animateContentSize(
                 animationSpec = tween(
                     durationMillis = 250,
-                    easing = FastOutSlowInEasing
+                    easing = FastOutLinearInEasing
                 )
             )
         )
@@ -224,10 +241,12 @@ internal fun ValidationError(
 @Composable
 internal fun EmailInput(
     email: String,
+    isError: Boolean,
     onValueChange: (String) -> Unit,
 ) {
     TextField(
         value = email,
+        isError = isError,
         onValueChange = onValueChange,
         singleLine = true,
         colors = TextFieldDefaults.textFieldColors(
@@ -235,7 +254,8 @@ internal fun EmailInput(
             backgroundColor = RecipeAppTheme.colors.white,
             cursorColor = RecipeAppTheme.colors.primary,
             focusedIndicatorColor = RecipeAppTheme.colors.primary,
-            unfocusedIndicatorColor = RecipeAppTheme.colors.silver
+            unfocusedIndicatorColor = RecipeAppTheme.colors.silver,
+            errorIndicatorColor = RecipeAppTheme.colors.red
         ),
         leadingIcon = {
             Image(
@@ -265,6 +285,7 @@ internal fun EmailInput(
 internal fun PasswordInput(
     password: String,
     previewEnabled: Boolean,
+    isError: Boolean,
     onValueChange: (String) -> Unit,
     onPreviewClick: () -> Unit,
     onDone: () -> Unit
@@ -272,13 +293,16 @@ internal fun PasswordInput(
     TextField(
         value = password,
         onValueChange = onValueChange,
+        isError = isError,
         singleLine = true,
         colors = TextFieldDefaults.textFieldColors(
             textColor = RecipeAppTheme.colors.secondary,
             backgroundColor = RecipeAppTheme.colors.white,
             cursorColor = RecipeAppTheme.colors.primary,
             focusedIndicatorColor = RecipeAppTheme.colors.primary,
-            unfocusedIndicatorColor = RecipeAppTheme.colors.silver
+            unfocusedIndicatorColor = RecipeAppTheme.colors.silver,
+            errorIndicatorColor = RecipeAppTheme.colors.red,
+            errorCursorColor = RecipeAppTheme.colors.red
         ),
         leadingIcon = {
             Image(
@@ -404,26 +428,6 @@ internal fun SignInPreview() {
     RecipeAppTheme {
         SignInContent(
             state = SignInState(email = "example@example.com", password = "123qwe"),
-            onEmailChange = {},
-            onPasswordChange = {},
-            onPreviewClick = {},
-            onForgotPasswordClick = {},
-            onSignInClick = {},
-            onRegisterClick = {}
-        )
-    }
-}
-
-@Preview
-@Composable
-internal fun SignInPreviewError() {
-    RecipeAppTheme {
-        SignInContent(
-            state = SignInState(
-                emailValidation = EmailValidation.Invalid,
-                fieldValidation = FieldValidation.Required,
-                validationEnabled = true
-            ),
             onEmailChange = {},
             onPasswordChange = {},
             onPreviewClick = {},
