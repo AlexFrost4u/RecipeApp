@@ -23,8 +23,11 @@ rootProject.name = "RecipeApp"
 // App modules
 include(":app")
 
-// Common modules
-include(":core:ui")
+// Core modules
+include(
+    ":core:ui",
+    ":core:testing"
+)
 
 // UI modules
 include(":ui:authorization")
