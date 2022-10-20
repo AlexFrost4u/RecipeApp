@@ -1,7 +1,7 @@
 package com.alexfrost.recipeapp.ui.authorization
 
-import android.util.Patterns
 import androidx.annotation.StringRes
+import androidx.core.util.PatternsCompat
 import com.alexfrost.core.ui.R as CoreRes
 
 internal enum class FieldValidation(
@@ -34,4 +34,4 @@ internal fun FieldValidation.isValid(): Boolean = this == FieldValidation.Valid
 
 internal fun EmailValidation.isValid(): Boolean = this == EmailValidation.Valid
 
-private fun String.isEmailFormat(): Boolean = Patterns.EMAIL_ADDRESS.matcher(this).matches()
+private fun String.isEmailFormat(): Boolean = PatternsCompat.EMAIL_ADDRESS.matcher(this).matches()

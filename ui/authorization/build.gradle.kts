@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation(projects.core.ui)
+    implementation(projects.core.testing)
 
     implementation(libs.mvi.orbit)
 
@@ -15,3 +16,5 @@ dependencies {
 
     implementation(libs.bundles.androidx.ui.compose)
 }
+
+tasks.withType<Test> { useJUnitPlatform() }
