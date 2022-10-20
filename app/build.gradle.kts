@@ -44,9 +44,12 @@ android {
 
 dependencies {
     implementation(projects.core.ui)
+    implementation(projects.ui.authorization)
 
     implementation(libs.bundles.androidx.ui.compose)
     implementation(libs.compose.navigation)
+
+    implementation(libs.koin.android)
 
     implementation(libs.accompanist.navigation.animation)
 
