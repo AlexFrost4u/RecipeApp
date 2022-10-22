@@ -31,3 +31,6 @@ include(
 
 // UI modules
 include(":ui:authorization")
+
+// Feature modules
+include(":feature:authorization:api")
