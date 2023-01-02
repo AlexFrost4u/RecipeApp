@@ -3,6 +3,11 @@ plugins {
     id("recipeapp.code.quality")
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 dependencies {
     implementation(projects.core.ui)
     implementation(projects.core.testing)
